@@ -31,7 +31,7 @@ func main() {
 
 	isContract := len(bytecode) > 0
 
-	fmt.Printf("is contract: %v\n", isContract) // is contract: true
+	fmt.Printf("is  contract: %v\n", isContract) // is contract: true
 
 	// a random user account address
 	address = common.HexToAddress("0xFcD1aef048EaA60cD07076f27FC6E4C4c642BC01")
