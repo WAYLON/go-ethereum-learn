@@ -66,5 +66,5 @@ func IntToBytes(n int, b byte) ([]byte, error) {
 		binary.Write(bytesBuffer, binary.BigEndian, &tmp)
 		return bytesBuffer.Bytes(), nil
 	}
-	return nil, fmt.Errorf("IntToBytes b param is invaild")
+	return nil, fmt.Errorf("IntToBytes  b param is invaild")
 }
