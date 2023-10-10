@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/ecdsa"
 	"fmt"
+	"go-ethereum-learn/encrypt"
 	"log"
 	"math/big"
 
@@ -17,12 +18,16 @@ import (
 )
 
 func main() {
+
+	aesEncrypt, _ := encrypt.AesEncrypt("eb327385b5187d8a2c8f25758840cb199010c3e90be1c8e08afbae19cc5def8d", "6LfQEWMbAAAAAE0AKpsr_dbxC6GmI2dwJXh2cOs3")
+
+	fmt.Println(aesEncrypt)
 	client, err := ethclient.Dial("https://rinkeby.infura.io")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	privateKey, err := crypto.HexToECDSA("私钥")
+	privateKey, err := crypto.HexToECDSA("eb327385b5187d8a2c8f25758840cb199010c3e90be1c8e08afbae19cc5def8d")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -34,6 +39,7 @@ func main() {
 	}
 
 	fromAddress := crypto.PubkeyToAddress(*publicKeyECDSA)
+	fmt.Println(fromAddress.String())
 	nonce, err := client.PendingNonceAt(context.Background(), fromAddress)
 	if err != nil {
 		log.Fatal(err)

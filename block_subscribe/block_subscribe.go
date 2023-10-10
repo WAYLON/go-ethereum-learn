@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	client, err := ethclient.Dial("wss://geth.mm.comeonbtc.com:8546/ws")
+	client, err := ethclient.Dial("wss://mainnet.infura.io/ws/v3/a45d5d9a11204e60b081ce0f5a56ad96")
 	if err != nil {
 		log.Fatal(err)
 	}

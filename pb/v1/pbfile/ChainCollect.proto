@@ -1,0 +1,516 @@
+syntax = "proto3";
+
+package ChainCollect;
+
+option go_package = "ChainCollect/pb/v1";
+
+import "google/api/annotations.proto";
+import "google/protobuf/descriptor.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+import "validate/validate.proto";
+
+extend google.protobuf.EnumValueOptions {
+  optional string car_name = 50001;
+  // Be sure to read the docs about choosing the number here.
+}
+
+option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
+  info: {
+    title: "ChainCollect api";
+    version: "1.0";
+  };
+  schemes: HTTP;
+  schemes: HTTPS;
+};
+
+
+service ChainCollect {
+  // 获取区块信息
+  rpc GetBlocks(GetBlocksReq) returns (GetBlocksResp) {
+    option (google.api.http) = {
+      post: "/api/v1/GetBlocks"
+      body: "*"
+    };
+  }
+
+  // 获取交易信息
+  rpc GetTransactions(GetTransactionsReq) returns (GetTransactionsResp) {
+    option (google.api.http) = {
+      post: "/api/v1/GetTransactions"
+      body: "*"
+    };
+  }
+
+  // 获取事件信息
+  rpc GetEvents(GetEventsReq) returns (GetEventsResp) {
+    option (google.api.http) = {
+      post: "/api/v1/GetEvents"
+      body: "*"
+    };
+  }
+
+  // 增加集合
+  rpc AddFilterSet(FilterSetReq) returns (FilterSetResp) {
+    option (google.api.http) = {
+      post: "/api/v1/AddFilterSet"
+      body: "*"
+    };
+  }
+
+  // 删除集合
+  rpc DeleteFilterSet(FilterSetReq) returns (FilterSetResp) {
+    option (google.api.http) = {
+      post: "/api/v1/DeleteFilterSet"
+      body: "*"
+    };
+  }
+
+  // 存储abi
+  rpc StorageAbi(StorageAbiReq) returns (NoResp) {
+    option (google.api.http) = {
+      post: "/api/v1/StorageAbi"
+      body: "*"
+    };
+  }
+
+  // 解析data
+  rpc ParseData(ParseDataReq) returns (ParseDataResp) {
+    option (google.api.http) = {
+      post: "/api/v1/ParseData"
+      body: "*"
+    };
+  }
+
+}
+
+message ParseDataReq{
+  ParseDataTypeEnum Type = 1;
+
+  // 仅解析topic时需要传递
+  string Topic0 = 2;
+  string Topic1 = 3;
+  string Topic2 = 4;
+  string Topic3 = 5;
+
+  string Data = 6;
+}
+
+enum ParseDataTypeEnum{
+  ParseDataTypeEnum_Function = 0;
+  ParseDataTypeEnum_Event = 1;
+  ParseDataTypeEnum_Error = 2;
+}
+
+message ParseDataResp{
+  oneof value{
+    ABIFunctionDetail ABIFunctionDetail = 1;
+    ABIEventDetail ABIEventDetail = 2;
+    ABIErrorDetail ABIErrorDetail = 3;
+  }
+}
+
+message StorageAbiReq{
+  string Name = 1;
+  string Content = 2;
+}
+
+message FilterSetReq{
+  // 约定好的 每个集合对应唯一key
+  string key = 1;
+  // 集合元素
+  repeated string set = 2;
+}
+
+message FilterSetResp{
+  FilterSetStatusEnum status = 1;
+  bool Update = 2;
+}
+
+enum FilterSetStatusEnum{
+  FilterSetStatusEnum_UNKNOWN = 0;
+
+  // 成功
+  FilterSetStatusEnum_Success = 1;
+
+  // 失败 不存在key
+  FilterSetStatusEnum_Key_Not_Exist = 2;
+}
+
+// no need return.
+message NoResp {
+}
+
+// no param.
+message NoReq {
+}
+
+message GetBlocksReq{
+  // 分页
+  PageInfoReq PageInfo = 1;
+
+  // 区块 以下所有范围查找均为左闭右闭.
+  // 开始时间
+  int64 StartTime = 2;
+  // 结束时间
+  int64 EndTime = 3;
+  // 起始高度
+  int64 StartNumber = 4;
+  // 结束高度
+  int64 EndNumber = 5;
+  // 矿工地址 (举例 "0xFcD1aef048EaA60cD07076f27FC6E4C4c642BC01" 以下地址同理).
+  string Miner = 6;
+  // 区块状态(不存在的状态会直接返回错误、以下枚举同理).
+  BlockStatusEnum Status = 7;
+  // 不同 EVM 链的一个标识.
+  int64 ChainId = 8;
+}
+
+message GetBlocksResp{
+  repeated BlockInfo Blocks = 2;
+}
+
+message GetTransactionsReq{
+  // 分页
+  PageInfoReq PageInfo = 1;
+
+  // 交易
+  // 开始时间
+  int64 StartTime = 2;
+  // 结束时间
+  int64 EndTime = 3;
+  // 发起地址
+  string From = 4;
+  // 接收地址(合约地址).
+  string To = 5;
+  // 交易状态：成功、失败、回滚.
+  TransactionStatusEnum Status = 6;
+  // 交易类型：伦敦协议交易、普通交易.
+  TransactionTypeEnum Type = 7;
+  // 交易nonce
+  int64 Nonce = 8;
+  // 交易hash (举例 "0x39c0084e11f4414c8bc4c7b98a43b7f7191624270a4874c78df2bca1809a612e" 以下hash同理 ).
+  string Hash = 9;
+
+  // 区块
+  // 区块id
+  string BlockId = 10;
+  // 区块hash
+  string BlockHash = 11;
+  // 起始高度
+  int64 StartBlockNumber = 12;
+  // 结束高度
+  int64 EndBlockNumber = 13;
+  // 不同 EVM 链的一个标识.
+  int64 ChainId = 14;
+}
+
+message GetTransactionsResp{
+  repeated TransactionInfo Transactions = 2;
+}
+
+message GetEventsReq{
+  // 分页
+  PageInfoReq PageInfo = 1;
+
+  // 事件
+  // 开始时间
+  int64 StartTime = 2;
+  // 结束时间
+  int64 EndTime = 3;
+  // 事件类型
+  EventTypeEnum Type = 4;
+  // topic(对应事件的函数签名的hash及参数等).
+  string Topic0 = 5;
+  string Topic1 = 6;
+  string Topic2 = 7;
+  string Topic3 = 8;
+  string Contract = 9;
+
+  // 交易
+  // 交易Id
+  string TransactionId = 10;
+  // 交易Hash
+  string TransactionHash = 11;
+  // 交易发起地址
+  string TransactionFrom = 12;
+  // 交易接收地址(合约地址\接收人地址).
+  string TransactionTo = 13;
+
+  // 区块
+  // 区块id
+  string BlockId = 14;
+  // 区块hash
+  string BlockHash = 15;
+  // 起始高度
+  int64 StartBlockNumber = 16;
+  // 结束高度
+  int64 EndBlockNumber = 17;
+  // 不同 EVM 链的一个标识.
+  int64 ChainId = 18;
+}
+
+message GetEventsResp{
+  repeated EventInfo Events = 2;
+}
+
+// 区块确认状态.
+message BlockConfirmStatus{
+  // 块确认次数.
+  int64 ConfirmNumbers = 1;
+
+  // 是否建议确认.
+  bool SuggestConfirm = 2;
+}
+
+// 区块信息
+message BlockInfo{
+  string Id = 1;
+  // 区块高度
+  int64 Number = 2;
+  // 区块Hash
+  string Hash = 3;
+  // 区块状态
+  BlockStatusEnum Status = 4;
+  // 区块产生时间
+  int64 Time = 5;
+  // 矿工地址
+  string Miner = 6;
+  // 交易数量
+  int64 TransactionNum = 7;
+  // 事件数量
+  int64 EventNum = 8;
+  // 不同 EVM 链的一个标识.
+  int64 ChainId = 9;
+  // 区块确认状态.
+  BlockConfirmStatus BlockConfirmStatus = 10;
+}
+
+// 交易信息
+message TransactionInfo {
+  string Id = 1;
+  // 交易hash
+  string Hash = 2;
+  // 发起地址
+  string From = 3;
+  // 接收地址
+  string To = 4;
+  // gas数量
+  string Gas = 5;
+  // gas价格
+  string GasPrice = 6;
+  // 交易时间
+  int64 Time = 7;
+  // 交易状态：成功、失败、回滚.
+  TransactionStatusEnum Status = 8;
+  // 交易类型：伦敦协议交易、普通交易.
+  TransactionTypeEnum Type = 9;
+  // 交易nonce
+  int64 Nonce = 10;
+  // 以太数量
+  string Value = 11;
+  // data 用data[:4] 匹配abi函数.
+  string Data = 12;
+  // 区块id
+  string BlockId = 13;
+  // 区块hash
+  string BlockHash = 14;
+  // 区块高度
+  int64 BlockNum = 15;
+  // 不同 EVM 链的一个标识.
+  int64 ChainId = 16;
+  // 区块确认状态.
+  BlockConfirmStatus BlockConfirmStatus = 17;
+  // 受支持的函数, 可以进行解析.
+  ABIFunctionDetail abiDetail = 18;
+  // 相关的事件.
+  repeated EventInfo relationEvents = 19;
+
+  // 受支持的error, 可以进行解析.
+  ABIErrorDetail errorAbiDetail = 20;
+}
+
+// 事件信息
+message EventInfo{
+  string Id = 1;
+  // 事件类型：自生成事件、链上事件.
+  EventTypeEnum Type = 2;
+  // event时间
+  int64 Time = 3;
+  // topic(对应事件的函数签名的hash及参数等).
+  string Topic0 = 4;
+  string Topic1 = 5;
+  string Topic2 = 6;
+  string Topic3 = 7;
+  // index
+  string Index = 8;
+  // 状态
+  EventStatusEnum Status = 9;
+  string Contract = 10;
+  // 事件data
+  string Data = 11;
+  // 区块id
+  string BlockId = 12;
+  // 区块hash
+  string BlockHash = 13;
+  // 区块高度
+  int64 BlockNum = 14;
+  // 交易id
+  string TransactionId = 15;
+  // 交易hash
+  string TransactionHash = 16;
+  // 发起地址
+  string TransactionFrom = 17;
+  // 交易接收地址(合约地址\接收人地址).
+  string TransactionTo = 18;
+  // 不同 EVM 链的一个标识.
+  int64 ChainId = 19;
+  // 区块确认状态.
+  BlockConfirmStatus BlockConfirmStatus = 20;
+  // 受支持的事件, 可以进行解析.
+  ABIEventDetail abiDetail = 21;
+  // 相关的事件.
+  repeated EventInfo relationEvents = 22;
+  // 相关的交易.
+  TransactionInfo relationTransaction = 23;
+  // tag
+  repeated string Tags = 24;
+  // 上一次出现这个事件的区块hash
+  string LastBlockHash = 25;
+}
+
+message ABIFunctionDetail{
+  string name = 1;
+  repeated ABIParam inputs = 2;
+  repeated ABIParam outputs = 3;
+}
+
+message ABIEventDetail{
+  string name = 1;
+  repeated ABIParam params = 2;
+}
+
+message ABIErrorDetail{
+  string name = 1;
+  repeated ABIParam inputs = 2;
+}
+
+message ABIParam{
+  // 字段名.
+  // 匿名结构为空.
+  string fieldName = 1;
+  // abi中的类型名.
+  // 匿名结构体直接使用原始类型字段.
+  string typeName = 2;
+
+  oneof value{
+    ABIBaseValue baseValue = 3;
+    ABIArrayBaseValue baseValues = 4;
+    ABIStructValue structValue = 5;
+    ABIArrayStructValue structValues = 6;
+    ABIBytesDecodeValue bytesDecodeValue = 7;
+  }
+}
+
+// 内建的数据类型, 包含uint, address, bytes(16进制表示)等, 不包含array.
+message ABIBaseValue{
+  oneof baseValue{
+    string uintX = 1;
+    string address = 2;
+    string bytesX = 3;
+    string stringX = 4;
+    string hash = 5;
+  }
+}
+
+// 内建数据类型的(多维)数组格式.
+message ABIArrayBaseValue{
+  repeated ABIParam values = 1;
+}
+
+// 结构体参数.
+message ABIStructValue{
+  repeated ABIParam structValue = 1;
+}
+
+// 结构体(暂不考虑多维)数组参数.
+message ABIArrayStructValue{
+  repeated ABIStructValue structValues = 1;
+}
+
+
+message ABIBytesDecodeValue{
+  bytes bytesX = 1;
+  oneof decodeValue{
+    // 函数打包.
+    ABIFunctionDetail function = 2;
+    // 结构体方式打包, 其中的fieldName为空.
+    ABIParam param = 3;
+  }
+}
+
+// 分页参数
+message PageInfoReq {
+  // 页码
+  int64 Page = 1 [(validate.rules).int64.gte = 0];
+  // 页数量
+  int64 PerPage = 2 [(validate.rules).int64.gt = 0];
+  // 下一页时, 传递当前页最后一条.
+  string LastID = 3;
+  // 上一页时, 传递当前页第一条.
+  string NextID = 4;
+}
+
+
+enum BlockStatusEnum{
+  BlockStatusEnum_UNKNOWN = 0;
+
+  // 正常
+  BlockStatusEnum_Normal = 1;
+
+  // 回滚
+  BlockStatusEnum_Rollback = 2;
+}
+
+enum EventStatusEnum{
+  EventStatusEnum_UNKNOWN = 0;
+
+  // 正常
+  EventStatusEnum_Normal = 1;
+
+  // 回滚
+  EventStatusEnum_Rollback = 2;
+}
+
+
+enum TransactionStatusEnum{
+  TransactionStatusEnum__UNKNOWN = 0;
+
+  // 成功
+  TransactionStatusEnum_Success = 1;
+
+  // 失败
+  TransactionStatusEnum_Fail = 2;
+
+  // 回滚
+  TransactionStatusEnum_Rollback = 3;
+}
+
+enum TransactionTypeEnum{
+  TransactionTypeEnum_UNKNOWN = 0;
+
+  // 伦敦协议交易
+  TransactionTypeEnum_London = 1;
+
+  // 普通交易
+  TransactionTypeEnum_Normal = 2;
+}
+
+enum EventTypeEnum{
+  EventTypeEnum_UNKNOWN = 0;
+
+  // 自生成事件
+  EventTypeEnum_Self_Generated = 1;
+
+  // 链上事件
+  EventTypeEnum_Chain = 2;
+}

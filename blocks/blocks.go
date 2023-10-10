@@ -14,7 +14,9 @@ import (
 )
 
 func main() {
-	client, err := ethclient.Dial("https://geth.mm.comeonbtc.com:8443")
+	//client, err := ethclient.Dial("https://goerli.infura.io/v3/1584263afc5e4818bd78e3507467b6c2")
+	//client, err := ethclient.Dial("https://sepolia.infura.io/v3/1584263afc5e4818bd78e3507467b6c2")
+	client, err := ethclient.Dial("https://mainnet.infura.io/v3/1584263afc5e4818bd78e3507467b6c2")
 	if err != nil {
 		log.Fatal(err)
 	}

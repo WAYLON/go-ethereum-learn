@@ -3,9 +3,9 @@ package main
 import (
 	"bytes"
 	"context"
-	"crypto/ecdsa"
 	"encoding/hex"
 	"fmt"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"log"
 	"math/big"
 
@@ -16,27 +16,17 @@ import (
 )
 
 func main() {
-	client, err := ethclient.Dial("xxx")
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println("we have a connection")
-	_ = client // we'll use this in the upcoming sections
-
-	privateKey, err := crypto.HexToECDSA("私钥")
+	client, err := ethclient.Dial("https://geth.inner.comeonbtc.com")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	publicKey := privateKey.Public()
-	publicKeyECDSA, ok := publicKey.(*ecdsa.PublicKey)
-	if !ok {
-		log.Fatal("cannot assert type: publicKey is not of type *ecdsa.PublicKey")
+	privateKey, err := crypto.HexToECDSA("ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80")
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	fromAddress := crypto.PubkeyToAddress(*publicKeyECDSA)
-
-	//fromAddress = common.HexToAddress("0xFcD1aef048EaA60cD07076f27FC6E4C4c642BC01")
+	fromAddress := common.HexToAddress("0x12d5E2A37c7814BF53C2231669ba0c426A79ce2b")
 
 	nonce, err := client.PendingNonceAt(context.Background(), fromAddress)
 	if err != nil {
@@ -64,10 +54,16 @@ func main() {
 	}
 
 	signedTx, err := types.SignTx(tx, types.NewEIP155Signer(chainID), privateKey)
+
+	h := types.NewEIP155Signer(chainID).Hash(tx)
+	fmt.Println(h.String())
+
+	// 签名
+	sign, err := hexutil.Decode("0x84cbed759da1e60939fa7f21ed40583d3034d53e81faf9594b1a42b8d470041e03620d2570bc51bc928c82c09348af0b5b0ceb931ed92578181a674078ace48d01")
+	signedTx, err = tx.WithSignature(types.NewEIP155Signer(chainID), sign)
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	ts := types.Transactions{signedTx}
 	var w = new(bytes.Buffer)
 	ts.EncodeIndex(0, w)

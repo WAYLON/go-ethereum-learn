@@ -12,12 +12,12 @@ import (
 )
 
 func main() {
-	client, err := ethclient.Dial("xxx")
+	client, err := ethclient.Dial("https://geth.inner.comeonbtc.com")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	rawTx := "f86e0d843b9aca07825208944d96972a599fd930434ddf3712583512c18b3f21880de0b6b3a7640000808306d104a05c831b3d01211018c10a2966f5d5b82519b70103a6f015b224ddbbfef70bbbefa01fbdd2e6cefe45535ed99403706bd8e62118a2550b8632c468a3dbdbd93a372e\n"
+	rawTx := "f86e038459682f07825208944d96972a599fd930434ddf3712583512c18b3f21880de0b6b3a7640000808306d104a084cbed759da1e60939fa7f21ed40583d3034d53e81faf9594b1a42b8d470041ea003620d2570bc51bc928c82c09348af0b5b0ceb931ed92578181a674078ace48d"
 
 	rawTxBytes, err := hex.DecodeString(rawTx)
 
